@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Amin Planner" />
+  <title>Amin · Daily Planner</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #0F0F0F; color: #E8E8E8; font-family: -apple-system, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 60px; }
+    button { font-family: inherit; cursor: pointer; }
+    input { font-family: inherit; }
+    .mono { font-family: 'Courier New', monospace; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+const aminShifts = {
+  27:"Spat",28:"Fruh",29:"Nacht",30:"Spat",31:"Fruh",32:"Spat",33:"Fruh",
+  34:"Nacht",35:"Spat",36:"Fruh",37:"Spat",38:"Fruh",39:"Nacht",40:"Spat",
+  41:"Fruh",42:"Spat",43:"Fruh",44:"Nacht",45:"Spat",46:"Fruh",47:"Spat",
+  48:"Fruh",49:"Nacht",50:"Spat",51:"Fruh",52:"Spat",53:"Fruh"
+};
+
+const shiftConfig = {
+  DayOff: {
+    label:"Day Off", hours:"free day", accent:"#4A9B6F", departureTime:null,
+    schedule:[
+      {time:"07:00",task:"Wake up — no rush",type:"routine"},
+      {time:"07:10",task:"2 glasses of water",type:"routine"},
+      {time:"07:30",task:"Workout — pull-ups + push-ups (50 reps)",type:"fitness"},
+      {time:"08:00",task:"Shower + breakfast",type:"routine"},
+      {time:"09:00",task:"Solo walk — min. 30 min",type:"fitness"},
+      {time:"10:00",task:"Content creation — social media video",type:"creative"},
+      {time:"13:00",task:"Lunch",type:"routine"},
+      {time:"14:00",task:"Free time / girlfriend",type:"personal"},
+      {time:"20:00",task:"Dinner",type:"routine"},
+      {time:"22:00",task:"No screens — wind down",type:"routine"},
+      {time:"23:00",task:"Sleep",type:"routine"}
+    ]
+  },
+  Fruh: {
+    label:"Morning Shift", hours:"06:00 — 14:00", accent:"#C9A84C", departureTime:"05:15",
+    schedule:[
+      {time:"05:00",task:"Wake up",type:"routine"},
+      {time:"05:05",task:"2 glasses of water",type:"routine"},
+      {time:"05:10",task:"Workout — pull-ups + push-ups (50 reps)",type:"fitness"},
+      {time:"05:35",task:"Shower + get ready",type:"routine"},
+      {time:"05:55",task:"Light breakfast",type:"routine"},
+      {time:"06:00",task:"Shift starts",type:"work"},
+      {time:"14:00",task:"Shift ends",type:"work"},
+      {time:"14:15",task:"Lunch",type:"routine"},
+      {time:"14:45",task:"Solo walk — min. 30 min",type:"fitness"},
+      {time:"15:30",task:"Content creation — social media video",type:"creative"},
+      {time:"17:30",task:"Free time / girlfriend",type:"personal"},
+      {time:"21:00",task:"Light dinner",type:"routine"},
+      {time:"22:00",task:"No screens — wind down",type:"routine"},
+      {time:"22:30",task:"Sleep",type:"routine"}
+    ]
+  },
+  Spat: {
+    label:"Afternoon Shift", hours:"14:00 — 22:00", accent:"#E07A3A", departureTime:"13:15",
+    schedule:[
+      {time:"05:30",task:"Wake up",type:"routine"},
+      {time:"05:35",task:"2 glasses of water",type:"routine"},
+      {time:"05:45",task:"Workout — pull-ups + push-ups (50 reps)",type:"fitness"},
+      {time:"06:15",task:"Shower + get ready",type:"routine"},
+      {time:"06:35",task:"Breakfast",type:"routine"},
+      {time:"07:00",task:"Solo walk — min. 30 min",type:"fitness"},
+      {time:"07:45",task:"Content creation — social media video",type:"creative"},
+      {time:"10:00",task:"Free time / rest",type:"personal"},
+      {time:"12:00",task:"Lunch + prepare for shift",type:"routine"},
+      {time:"14:00",task:"Shift starts",type:"work"},
+      {time:"22:00",task:"Shift ends",type:"work"},
+      {time:"22:20",task:"Light dinner",type:"routine"},
+      {time:"23:00",task:"No screens — wind down",type:"routine"},
+      {time:"23:30",task:"Sleep",type:"routine"}
+    ]
+  },
+  Nacht: {
+    label:"Night Shift", hours:"22:00 — 06:00", accent:"#7C9EBD", departureTime:"21:15",
+    schedule:[
+      {time:"13:30",task:"Wake up (after night shift)",type:"routine"},
+      {time:"13:35",task:"2 glasses of water",type:"routine"},
+      {time:"13:45",task:"Breakfast / brunch",type:"routine"},
+      {time:"14:15",task:"Solo walk — min. 30 min",type:"fitness"},
+      {time:"15:00",task:"Workout — pull-ups + push-ups (50 reps)",type:"fitness"},
+      {time:"15:30",task:"Shower",type:"routine"},
+      {time:"16:00",task:"Content creation — social media video",type:"creative"},
+      {time:"18:30",task:"Free time / girlfriend",type:"personal"},
+      {time:"20:30",task:"Dinner",type:"routine"},
+      {time:"21:00",task:"Prepare for shift",type:"routine"},
+      {time:"22:00",task:"Shift starts",type:"work"},
+      {time:"06:00",task:"Shift ends",type:"work"}
+    ]
+  }
+};
+
+const typeColors = {
+  routine:"#4A4A4A", work:"#C9A84C", fitness:"#5E9E7A",
+  creative:"#9B8EC4", personal:"#7A9EBD", custom:"#D95F7A", grocery:"#E8B84B"
+};
+
+const publicHolidays = new Set([
+  "2026-01-01","2026-04-03","2026-04-06","2026-05-01",
+  "2026-05-14","2026-05-25","2026-10-03","2026-10-31",
+  "2026-12-25","2026-12-26"
+]);
+
+const groceryList = [
+  "Protein (chicken / eggs / fish)",
+  "Vegetables (fresh or frozen)",
+  "Fruit (2-3 types)",
+  "Rice / oats / pasta",
+  "Dairy (milk / yogurt / cheese)",
+  "Bread / wraps",
+  "Healthy snacks (nuts, seeds)",
+  "Water / drinks",
+  "Olive oil / sauces",
+  "Supplements (if needed)"
+];
+
+function getWeekNumber(date) {
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  var dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function getMondayOfWeek(week, year) {
+  var jan4 = new Date(year, 0, 4);
+  var jan4Day = jan4.getDay() || 7;
+  var monday = new Date(jan4);
+  monday.setDate(jan4.getDate() - jan4Day + 1 + (week - 1) * 7);
+  return monday;
+}
+
+function dateKey(d) { return d.toDateString(); }
+
+function isoDate(d) {
+  return d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+}
+
+function timeToMin(t) {
+  if (!t) return 9999;
+  var p = t.split(":");
+  return parseInt(p[0])*60 + parseInt(p[1]);
+}
+
+function isHoliday(date) { return publicHolidays.has(isoDate(date)); }
+
+function getDayType(date) {
+  if (isHoliday(date)) return "holiday";
+  var d = date.getDay();
+  if (d === 0) return "sunday";
+  if (d === 6) return "saturday";
+  return "weekday";
+}
+
+// Find "Shift ends" check key for a given date+shiftKey
+function shiftEndsKey(date, sk) {
+  var schedule = shiftConfig[sk].schedule;
+  for (var i = 0; i < schedule.length; i++) {
+    if (schedule[i].task === "Shift ends") {
+      return sk + "-" + dateKey(date) + "-" + i;
+    }
+  }
+  return null;
+}
+
+function calcMonthlyPay(year, month) {
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var earned = { sat:0, sun:0, hol:0, night:0 };
+  var max = { sat:0, sun:0, hol:0, night:0 };
+  var nightWeekEarned = new Set();
+  var nightWeekMax = new Set();
+  var earnedDetails = [];
+  var maxDetails = [];
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var date = new Date(year, month, d);
+    var dk = dateKey(date);
+    var week = getWeekNumber(date);
+    var sk = state.shiftOverrides[dk] || aminShifts[week] || "Spat";
+    if (sk === "DayOff") continue;
+
+    var dayType = getDayType(date);
+    var hours = state.customHours[dk] || 8;
+    var closed = !!state.closedDays[dk];
+
+    // Night week tracking
+    if (sk === "Nacht") {
+      nightWeekMax.add(week);
+      var enk = shiftEndsKey(date, sk);
+      if (enk && state.checked[enk]) nightWeekEarned.add(week);
+    }
+
+    if (dayType === "weekday") continue;
+    if (closed) continue;
+
+    var extra = 0;
+    var label = date.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+
+    if (dayType === "holiday") {
+      extra = 250;
+      maxDetails.push({label:label, type:"holiday", extra:250});
+      max.hol += 250;
+      var enk2 = shiftEndsKey(date, sk);
+      if (enk2 && state.checked[enk2]) { earned.hol += 250; earnedDetails.push({label:label,type:"holiday",extra:250}); }
+    } else if (dayType === "sunday") {
+      extra = 200;
+      maxDetails.push({label:label, type:"sunday", extra:200});
+      max.sun += 200;
+      var enk3 = shiftEndsKey(date, sk);
+      if (enk3 && state.checked[enk3]) { earned.sun += 200; earnedDetails.push({label:label,type:"sunday",extra:200}); }
+    } else if (dayType === "saturday") {
+      extra = hours < 7 ? 85 : 150;
+      maxDetails.push({label:label, type:"saturday", extra:150});
+      max.sat += 150;
+      var enk4 = shiftEndsKey(date, sk);
+      if (enk4 && state.checked[enk4]) { earned.sat += extra; earnedDetails.push({label:label,type:"saturday",extra:extra,hours:hours}); }
+    }
+  }
+
+  var nightEarned = nightWeekEarned.size * 150;
+  var nightMax = nightWeekMax.size * 150;
+  var earnedTotal = 2050 + earned.sat + earned.sun + earned.hol + nightEarned;
+  var maxTotal = 2050 + max.sat + max.sun + max.hol + nightMax;
+
+  return {
+    earnedExtras: earned.sat + earned.sun + earned.hol + nightEarned,
+    earnedTotal: earnedTotal,
+    maxTotal: maxTotal,
+    maxExtras: max.sat + max.sun + max.hol + nightMax,
+    earnedDetails: earnedDetails,
+    maxDetails: maxDetails,
+    nightEarned: nightEarned,
+    nightMax: nightMax,
+    nightWeeksEarned: nightWeekEarned.size,
+    nightWeeksMax: nightWeekMax.size
+  };
+}
+
+// STATE
+var state = {
+  selectedDate: new Date(),
+  checked: {},
+  customTasks: [],
+  showAdd: false,
+  newTaskTitle: "",
+  newTaskTime: "",
+  view: "day",
+  showGrocery: false,
+  lastShopping: null,
+  shiftOverrides: {},
+  showShiftPicker: false,
+  customHours: {},
+  showHoursPicker: false,
+  closedDays: {}
+};
+
+try {
+  var saved = localStorage.getItem("aminPlanner");
+  if (saved) {
+    var parsed = JSON.parse(saved);
+    state.checked = parsed.checked || {};
+    state.customTasks = parsed.customTasks || [];
+    state.lastShopping = parsed.lastShopping || null;
+    state.shiftOverrides = parsed.shiftOverrides || {};
+    state.customHours = parsed.customHours || {};
+    state.closedDays = parsed.closedDays || {};
+  }
+} catch(e) {}
+
+(function() {
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  var tk = dateKey(tomorrow);
+  var already = state.customTasks.some(function(t){ return t.isGrocery && t.dateKey === tk; });
+  if (!already && !state.lastShopping) {
+    state.customTasks.push({id:9000001, title:"Grocery shopping", time:"09:00", dateKey:tk, isGrocery:true});
+    state.lastShopping = tk;
+  }
+})();
+
+function save() {
+  try {
+    localStorage.setItem("aminPlanner", JSON.stringify({
+      checked: state.checked,
+      customTasks: state.customTasks,
+      lastShopping: state.lastShopping,
+      shiftOverrides: state.shiftOverrides,
+      customHours: state.customHours,
+      closedDays: state.closedDays
+    }));
+  } catch(e) {}
+}
+
+function setState(updates) {
+  for (var k in updates) state[k] = updates[k];
+  save();
+  render();
+}
+
+function toggle(key, isGrocery, grocDK) {
+  var nc = Object.assign({}, state.checked);
+  nc[key] = !nc[key];
+  var newTasks = state.customTasks.slice();
+  var newLS = state.lastShopping;
+  if (nc[key] && isGrocery && grocDK) {
+    var base = new Date(grocDK);
+    var next = new Date(base);
+    next.setDate(next.getDate() + 5);
+    var nk = dateKey(next);
+    var already = newTasks.some(function(t){ return t.isGrocery && t.dateKey === nk; });
+    if (!already) {
+      newTasks.push({id:Date.now(), title:"Grocery shopping", time:"09:00", dateKey:nk, isGrocery:true});
+      newLS = nk;
+    }
+  }
+  setState({checked:nc, customTasks:newTasks, lastShopping:newLS});
+}
+
+function scheduleNextShopping(days) {
+  var base = state.lastShopping ? new Date(state.lastShopping) : new Date(state.selectedDate);
+  var next = new Date(base);
+  next.setDate(next.getDate() + days);
+  var nk = dateKey(next);
+  var newTasks = state.customTasks.slice();
+  if (!newTasks.some(function(t){ return t.isGrocery && t.dateKey === nk; }))
+    newTasks.push({id:Date.now(), title:"Grocery shopping", time:"09:00", dateKey:nk, isGrocery:true});
+  setState({customTasks:newTasks, lastShopping:nk, showGrocery:false});
+}
+
+function addTask() {
+  if (!state.newTaskTitle || !state.newTaskTime) return;
+  var newTasks = state.customTasks.slice();
+  newTasks.push({id:Date.now(), title:state.newTaskTitle, time:state.newTaskTime, dateKey:dateKey(state.selectedDate), isGrocery:false});
+  setState({customTasks:newTasks, newTaskTitle:"", newTaskTime:"", showAdd:false});
+}
+
+function changeDay(delta) {
+  var d = new Date(state.selectedDate);
+  d.setDate(d.getDate() + delta);
+  setState({selectedDate:d});
+}
+
+function el(tag, attrs) {
+  var e = document.createElement(tag);
+  if (attrs) {
+    for (var k in attrs) {
+      if (k === "style" && typeof attrs[k] === "object") {
+        for (var s in attrs[k]) e.style[s] = attrs[k][s];
+      } else if (k === "onClick") {
+        e.addEventListener("click", attrs[k]);
+      } else if (k === "className") {
+        e.className = attrs[k];
+      } else {
+        e.setAttribute(k, attrs[k]);
+      }
+    }
+  }
+  for (var i = 2; i < arguments.length; i++) {
+    var child = arguments[i];
+    if (child == null || child === false) continue;
+    if (typeof child === "string") e.appendChild(document.createTextNode(child));
+    else e.appendChild(child);
+  }
+  return e;
+}
+
+function render() {
+  var now = new Date();
+  var sel = state.selectedDate;
+  var week = getWeekNumber(sel);
+  var dk = dateKey(sel);
+  var shiftKey = state.shiftOverrides[dk] || aminShifts[week] || "Spat";
+  var isOverridden = !!state.shiftOverrides[dk];
+  var isDayOff = shiftKey === "DayOff";
+  var shift = shiftConfig[shiftKey];
+  var accent = shift.accent;
+  var isToday = dateKey(sel) === dateKey(now);
+  var dayProgress = Math.round(((now.getHours()*60+now.getMinutes())/1440)*100);
+  var nowStr = now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  var dateStr = sel.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  var customHoursToday = state.customHours[dk] || null;
+  var view = state.view;
+  var daysSince = state.lastShopping ? Math.floor((now - new Date(state.lastShopping))/86400000) : 999;
+  var needsShopping = daysSince >= 4;
+
+  var todayCustom = state.customTasks
+    .filter(function(t){ return t.dateKey === dateKey(sel); })
+    .map(function(t){ return {time:t.time, task:t.title, type:t.isGrocery?"grocery":"custom", id:t.id, isGrocery:t.isGrocery, dateKey:t.dateKey, _key:"task-"+t.id}; });
+
+  var merged = shift.schedule.map(function(s,i){ return Object.assign({},s,{_key:shiftKey+"-"+dateKey(sel)+"-"+i}); })
+    .concat(todayCustom)
+    .sort(function(a,b){ return timeToMin(a.time)-timeToMin(b.time); });
+
+  var monday = getMondayOfWeek(week, sel.getFullYear());
+  var weekDays = [];
+  for (var wi=0; wi<7; wi++) {
+    var wd = new Date(monday);
+    wd.setDate(monday.getDate()+wi);
+    weekDays.push(wd);
+  }
+
+  var app = document.getElementById("app");
+  app.innerHTML = "";
+
+  // ── HEADER
+  var header = el("div",{style:{padding:"28px 20px 14px",borderBottom:"1px solid #1A1A1A"}},
+    el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}},
+      el("div",{},
+        el("div",{style:{fontSize:"9px",letterSpacing:"2px",color:"#2E2E2E",marginBottom:"4px"}},"AMIN · DAILY PLANNER · 2026"),
+        el("div",{style:{fontSize:"18px",fontWeight:"300",color:"#DCDCDC"}},dateStr),
+        el("div",{style:{fontSize:"11px",color:"#3A3A3A",marginTop:"3px"}},"Week "+week)
+      ),
+      el("div",{style:{textAlign:"right"}},
+        el("div",{className:"mono",style:{fontSize:"26px",fontWeight:"200",color:accent}},nowStr),
+        isToday ? el("div",{style:{fontSize:"9px",color:"#333",letterSpacing:"1px",marginTop:"2px"}},"TODAY") : el("span",{})
+      )
+    ),
+    el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},
+      el("button",{style:{background:"none",border:"1px solid #1E1E1E",color:"#555",width:"32px",height:"32px",borderRadius:"5px",fontSize:"18px"},onClick:function(){changeDay(-1);}},"‹"),
+      el("div",{style:{flex:"1",textAlign:"center"}},
+        el("div",{style:{display:"inline-flex",alignItems:"center",gap:"8px",background:accent+"12",border:"1px solid "+accent+"30",borderRadius:"20px",padding:"6px 14px"}},
+          el("span",{style:{fontSize:"12px",color:accent,fontWeight:"500"}},shift.label),
+          el("span",{className:"mono",style:{fontSize:"10px",color:accent+"80"}},shift.hours),
+          isOverridden ? el("span",{style:{fontSize:"9px",color:accent,background:accent+"25",padding:"1px 5px",borderRadius:"8px"}},"edited") : el("span",{}),
+          el("button",{style:{background:"transparent",border:"none",color:accent+"99",fontSize:"13px",padding:"0 0 0 2px"},onClick:function(e){e.stopPropagation();setState({showShiftPicker:true});}},"✏️")
+        )
+      ),
+      el("button",{style:{background:"none",border:"1px solid #1E1E1E",color:"#555",width:"32px",height:"32px",borderRadius:"5px",fontSize:"18px"},onClick:function(){changeDay(1);}},"›")
+    ),
+    isToday ? el("div",{},
+      el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"5px"}},
+        el("span",{style:{fontSize:"9px",color:"#2A2A2A",letterSpacing:"1px"}},"DAY PROGRESS"),
+        el("span",{className:"mono",style:{fontSize:"9px",color:accent}},dayProgress+"%")
+      ),
+      el("div",{style:{height:"2px",background:"#181818",borderRadius:"1px"}},
+        el("div",{style:{height:"100%",width:dayProgress+"%",background:accent,borderRadius:"1px"}})
+      )
+    ) : el("span",{})
+  );
+
+  // ── DEPARTURE
+  var departure;
+  if (isDayOff) {
+    departure = el("div",{style:{margin:"10px 20px 0",padding:"10px 14px",background:"#0D1A12",border:"1px solid #1A3D25",borderRadius:"6px",display:"flex",alignItems:"center",gap:"10px"}},
+      el("span",{style:{fontSize:"16px"}},"🌿"),
+      el("div",{},
+        el("div",{style:{fontSize:"11px",color:"#4A9B6F",fontWeight:"600"}},"Day Off — Rest & Recharge"),
+        el("div",{style:{fontSize:"10px",color:"#2A4A35",marginTop:"1px"}},"No work today")
+      )
+    );
+  } else {
+    var depInner = el("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+      el("span",{style:{fontSize:"16px"}},"🚶"),
+      el("div",{style:{flex:"1"}},
+        el("div",{style:{fontSize:"11px",color:accent,fontWeight:"600"}},"Leave home by "+shift.departureTime),
+        el("div",{style:{fontSize:"10px",color:"#3A3A3A",marginTop:"1px"}},"45 min before shift starts")
+      ),
+      el("button",{style:{background:accent+"15",border:"1px solid "+accent+"30",color:accent,padding:"4px 10px",borderRadius:"4px",fontSize:"10px"},
+        onClick:function(){setState({showHoursPicker:true});}},
+        customHoursToday ? customHoursToday+"h worked" : "Log hours"
+      )
+    );
+    departure = el("div",{style:{margin:"10px 20px 0",padding:"10px 14px",background:accent+"0D",border:"1px solid "+accent+"25",borderRadius:"6px"}},depInner);
+    if (customHoursToday) {
+      var pct = Math.min(100,(customHoursToday/8)*100);
+      var barColor = customHoursToday < 8 ? "#E07A3A" : "#4A9B6F";
+      departure.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"8px"}},
+        el("div",{style:{flex:"1",height:"3px",background:"#1A1A1A",borderRadius:"2px"}},
+          el("div",{style:{height:"100%",width:pct+"%",background:barColor,borderRadius:"2px"}})
+        ),
+        el("span",{className:"mono",style:{fontSize:"9px",color:"#444"}},customHoursToday+"/8h")
+      ));
+    }
+  }
+
+  // ── GROCERY BANNER
+  var groceryBanner = null;
+  if (needsShopping) {
+    groceryBanner = el("div",{style:{margin:"8px 20px 0",padding:"10px 14px",background:"#1A1400",border:"1px solid #3A2800",borderRadius:"6px",display:"flex",alignItems:"center",justifyContent:"space-between"}},
+      el("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
+        el("span",{style:{fontSize:"15px"}},"🛒"),
+        el("div",{},
+          el("div",{style:{fontSize:"11px",color:"#E8B84B",fontWeight:"600"}},"Time to restock!"),
+          el("div",{style:{fontSize:"10px",color:"#5A4A20",marginTop:"1px"}},daysSince+" days since last shopping")
+        )
+      ),
+      el("button",{style:{background:"#E8B84B22",border:"1px solid #E8B84B44",color:"#E8B84B",padding:"5px 12px",borderRadius:"4px",fontSize:"10px"},
+        onClick:function(){setState({showGrocery:true});}
+      },"PLAN")
+    );
+  }
+
+  // ── VIEW TOGGLE
+  var viewToggle = el("div",{style:{display:"flex",margin:"12px 20px 0",gap:"6px"}});
+  ["day","week","pay"].forEach(function(v) {
+    var isActive = view === v;
+    var ac = v==="pay" ? "#4A9B6F" : accent;
+    var label = v==="pay" ? "PAY" : v.toUpperCase();
+    viewToggle.appendChild(el("button",{
+      style:{flex:"1",padding:"6px 4px",background:isActive?"#181818":"transparent",
+        border:"1px solid "+(isActive?ac+"55":"#1A1A1A"),color:isActive?ac:"#3A3A3A",
+        borderRadius:"4px",fontSize:"10px",letterSpacing:"1px"},
+      onClick:function(){ setState({view:v}); }
+    },label));
+  });
+
+  // ── LEGEND
+  var legend = el("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px 14px",padding:"10px 20px",borderBottom:"1px solid #141414"}});
+  var legendItems = {routine:"Routine",work:"Work",fitness:"Fitness",creative:"Creative",personal:"Personal",custom:"My Task"};
+  for (var lk in legendItems) {
+    legend.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"5px"}},
+      el("div",{style:{width:"5px",height:"5px",borderRadius:"50%",background:typeColors[lk]}}),
+      el("span",{style:{fontSize:"9px",color:"#333"}},legendItems[lk])
+    ));
+  }
+
+  var content;
+
+  // ══════════════════════════════════════════
+  // DAY VIEW
+  // ══════════════════════════════════════════
+  if (view === "day") {
+    var schedDiv = el("div",{style:{padding:"10px 20px 0"}},
+      el("div",{style:{fontSize:"9px",color:"#252525",letterSpacing:"2px",marginBottom:"8px",paddingBottom:"8px",borderBottom:"1px solid #141414"}},"SCHEDULE")
+    );
+    merged.forEach(function(item) {
+      var key = item._key;
+      var done = !!state.checked[key];
+      var isCustomType = item.type==="custom"||item.type==="grocery";
+      var itemColor = typeColors[item.type]||typeColors.custom;
+      var row = el("div",{
+        style:{display:"flex",alignItems:"center",gap:"12px",padding:"10px 0",
+          borderBottom:"1px solid #111",
+          borderLeft:isCustomType?"2px solid "+itemColor:"2px solid transparent",
+          paddingLeft:isCustomType?"8px":"0",
+          opacity:done?"0.28":"1"},
+        onClick:(function(k,ig,gdk){ return function(){ toggle(k,ig,gdk); }; })(key,item.isGrocery,item.dateKey)
+      },
+        el("div",{className:"mono",style:{fontSize:"11px",color:isCustomType?itemColor:"#3A3A3A",minWidth:"42px"}},item.time),
+        el("div",{style:{width:"5px",height:"5px",borderRadius:"50%",background:done?"#1E1E1E":itemColor,flexShrink:"0"}}),
+        el("div",{style:{flex:"1",fontSize:"13px",color:done?"#2A2A2A":isCustomType?"#F0D080":"#CECECE",textDecoration:done?"line-through":"none"}},item.task),
+        el("div",{style:{width:"17px",height:"17px",border:"1px solid "+(done?accent:"#222"),borderRadius:"3px",background:done?accent:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},
+          done?el("span",{style:{color:"#0F0F0F",fontSize:"10px",fontWeight:"800"}},"✓"):el("span",{})
+        )
+      );
+      schedDiv.appendChild(row);
+    });
+
+    var addSection = el("div",{style:{padding:"14px 20px 0"}},
+      el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},
+        el("div",{style:{fontSize:"9px",color:"#252525",letterSpacing:"2px"}},"ADD TO TODAY"),
+        el("button",{style:{background:"transparent",border:"1px solid "+typeColors.custom+"55",color:typeColors.custom,padding:"5px 14px",borderRadius:"4px",fontSize:"11px"},
+          onClick:function(){setState({showAdd:!state.showAdd});}
+        },"+ Add Task")
+      )
+    );
+    if (state.showAdd) {
+      var addForm = el("div",{style:{background:"#131313",border:"1px solid "+typeColors.custom+"30",borderRadius:"8px",padding:"14px",marginBottom:"10px"}},
+        el("div",{style:{fontSize:"10px",color:typeColors.custom,marginBottom:"10px",letterSpacing:"1px"}},
+          "NEW TASK — "+sel.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})
+        )
+      );
+      var titleInp = document.createElement("input");
+      titleInp.placeholder="Task title...";
+      titleInp.value=state.newTaskTitle;
+      titleInp.style.cssText="width:100%;background:#0A0A0A;border:1px solid #1E1E1E;color:#E8E8E8;padding:8px 10px;border-radius:5px;font-size:13px;margin-bottom:8px;outline:none;box-sizing:border-box;";
+      titleInp.addEventListener("input",function(e){state.newTaskTitle=e.target.value;});
+      var timeInp = document.createElement("input");
+      timeInp.type="time"; timeInp.value=state.newTaskTime;
+      timeInp.style.cssText="width:100%;background:#0A0A0A;border:1px solid #1E1E1E;color:#777;padding:7px 8px;border-radius:5px;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;";
+      timeInp.addEventListener("change",function(e){state.newTaskTime=e.target.value;});
+      addForm.appendChild(titleInp);
+      addForm.appendChild(timeInp);
+      addForm.appendChild(el("div",{style:{display:"flex",gap:"8px"}},
+        el("button",{style:{flex:"1",background:typeColors.custom,border:"none",color:"#FFF",padding:"9px",borderRadius:"5px",fontSize:"12px",fontWeight:"700"},onClick:addTask},"Add to Schedule"),
+        el("button",{style:{padding:"9px 16px",background:"transparent",border:"1px solid #1E1E1E",color:"#444",borderRadius:"5px",fontSize:"12px"},onClick:function(){setState({showAdd:false});}},"Cancel")
+      ));
+      addSection.appendChild(addForm);
+    }
+    content = el("div",{},schedDiv,addSection);
+
+  // ══════════════════════════════════════════
+  // WEEK VIEW
+  // ══════════════════════════════════════════
+  } else if (view === "week") {
+    var weekDiv = el("div",{style:{padding:"14px 20px 0"}},
+      el("div",{style:{fontSize:"9px",color:"#252525",letterSpacing:"2px",marginBottom:"12px"}},"WEEK "+week+" — SHIFT OVERVIEW")
+    );
+    weekDays.forEach(function(d) {
+      var wk = getWeekNumber(d);
+      var ddk = dateKey(d);
+      var sk = state.shiftOverrides[ddk] || aminShifts[wk] || "Spat";
+      var sc = shiftConfig[sk];
+      var isSel = ddk===dateKey(sel);
+      var isTod = ddk===dateKey(now);
+      var isClosed = !!state.closedDays[ddk];
+      var dayType = getDayType(d);
+      var isWeekend = dayType==="saturday"||dayType==="sunday"||dayType==="holiday";
+
+      var row = el("div",{
+        style:{display:"flex",alignItems:"center",gap:"14px",padding:"11px 12px",marginBottom:"5px",
+          background:isSel?"#141414":"transparent",
+          border:"1px solid "+(isSel?sc.accent+"40":"#141414"),
+          borderRadius:"7px",opacity:isClosed?"0.4":"1"},
+        onClick:(function(dd){ return function(){ setState({selectedDate:dd,view:"day"}); }; })(d)
+      },
+        el("div",{style:{minWidth:"32px"}},
+          el("div",{style:{fontSize:"9px",color:isTod?sc.accent:isWeekend?"#C9A84C":"#333",fontWeight:"700",letterSpacing:"1px"}},d.toLocaleDateString("en-GB",{weekday:"short"}).toUpperCase()),
+          el("div",{style:{fontSize:"18px",fontWeight:"200",color:isTod?"#E8E8E8":"#555",marginTop:"1px"}},d.getDate())
+        ),
+        el("div",{style:{width:"1px",height:"34px",background:"#1A1A1A"}}),
+        el("div",{style:{flex:"1"}},
+          el("div",{style:{fontSize:"12px",color:isClosed?"#333":sc.accent,marginBottom:"3px",fontWeight:"500"}},isClosed?"Closed":sc.label),
+          el("div",{className:"mono",style:{fontSize:"10px",color:"#2E2E2E"}},sc.hours+(sc.departureTime?" · leave "+sc.departureTime:""))
+        ),
+        isWeekend ? el("button",{
+          style:{padding:"4px 8px",background:isClosed?"#2A1A1A":"#1A1A1A",border:"1px solid "+(isClosed?"#5A2A2A":"#252525"),
+            color:isClosed?"#D95F7A":"#444",borderRadius:"4px",fontSize:"9px",flexShrink:"0"},
+          onClick:(function(ddk2,closed){ return function(e){
+            e.stopPropagation();
+            var nc = Object.assign({},state.closedDays);
+            if (closed) delete nc[ddk2]; else nc[ddk2]=true;
+            setState({closedDays:nc});
+          };})(ddk,isClosed)
+        }, isClosed?"Reopen":"Closed") : el("div",{style:{fontSize:"12px",color:"#1E1E1E"}},"›")
+      );
+      weekDiv.appendChild(row);
+    });
+    content = weekDiv;
+
+  // ══════════════════════════════════════════
+  // PAY VIEW
+  // ══════════════════════════════════════════
+  } else {
+    var payYear = sel.getFullYear();
+    var payMonth = sel.getMonth();
+    var monthName = sel.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+    var pay = calcMonthlyPay(payYear, payMonth);
+    var tcPay = {holiday:"#D95F7A",sunday:"#9B8EC4",saturday:"#E07A3A"};
+    var tlPay = {holiday:"Public Holiday",sunday:"Sunday",saturday:"Saturday"};
+
+    var payDiv = el("div",{style:{padding:"14px 20px 0"}});
+
+    // Month nav
+    payDiv.appendChild(el("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"20px"}},
+      el("button",{style:{background:"none",border:"1px solid #1E1E1E",color:"#555",width:"32px",height:"32px",borderRadius:"5px",fontSize:"18px"},
+        onClick:function(){var d=new Date(sel);d.setMonth(d.getMonth()-1);setState({selectedDate:d});}
+      },"‹"),
+      el("div",{style:{textAlign:"center"}},
+        el("div",{style:{fontSize:"9px",color:"#333",letterSpacing:"2px",marginBottom:"4px"}},"PAYCHECK ESTIMATE"),
+        el("div",{style:{fontSize:"16px",color:"#DCDCDC",fontWeight:"300"}},monthName)
+      ),
+      el("button",{style:{background:"none",border:"1px solid #1E1E1E",color:"#555",width:"32px",height:"32px",borderRadius:"5px",fontSize:"18px"},
+        onClick:function(){var d=new Date(sel);d.setMonth(d.getMonth()+1);setState({selectedDate:d});}
+      },"›")
+    ));
+
+    // ── EARNED SO FAR card
+    payDiv.appendChild(el("div",{style:{background:"linear-gradient(135deg,#141414,#1A1A1A)",border:"1px solid #2A2A2A",borderRadius:"16px",padding:"22px 20px",marginBottom:"10px"}},
+      el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"16px"}},
+        el("div",{},
+          el("div",{style:{fontSize:"9px",color:"#444",letterSpacing:"2px",marginBottom:"6px"}},"EARNED SO FAR"),
+          el("div",{style:{fontSize:"38px",fontWeight:"200",color:"#4A9B6F",letterSpacing:"-1px",lineHeight:"1"}},"€"+pay.earnedTotal.toLocaleString()),
+          el("div",{style:{fontSize:"11px",color:"#333",marginTop:"6px"}},"Base €2,050 + €"+pay.earnedExtras+" extras")
+        ),
+        el("div",{style:{textAlign:"right"}},
+          el("div",{style:{fontSize:"9px",color:"#2A2A2A",letterSpacing:"1px",marginBottom:"4px"}},"WORKED"),
+          el("div",{style:{fontSize:"20px",color:"#4A9B6F",fontWeight:"300"}}),
+          el("div",{style:{fontSize:"12px",color:"#333"}},pay.earnedDetails.length+" days")
+        )
+      ),
+      // Progress bar toward max
+      el("div",{style:{marginTop:"4px"}},
+        el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"5px"}},
+          el("span",{style:{fontSize:"9px",color:"#333"}},"Progress to max"),
+          el("span",{className:"mono",style:{fontSize:"9px",color:"#4A9B6F"}},
+            Math.round((pay.earnedTotal/pay.maxTotal)*100)+"%"
+          )
+        ),
+        el("div",{style:{height:"3px",background:"#1E1E1E",borderRadius:"2px"}},
+          el("div",{style:{height:"100%",width:Math.round((pay.earnedTotal/pay.maxTotal)*100)+"%",background:"#4A9B6F",borderRadius:"2px"}})
+        )
+      )
+    ));
+
+    // ── MAX POTENTIAL card
+    payDiv.appendChild(el("div",{style:{background:"#111",border:"1px solid #1E1E1E",borderRadius:"12px",padding:"16px 20px",marginBottom:"14px",display:"flex",justifyContent:"space-between",alignItems:"center"}},
+      el("div",{},
+        el("div",{style:{fontSize:"9px",color:"#2A2A2A",letterSpacing:"2px",marginBottom:"5px"}},"MAXIMUM THIS MONTH"),
+        el("div",{style:{fontSize:"26px",fontWeight:"200",color:"#555",letterSpacing:"-0.5px"}},"€"+pay.maxTotal.toLocaleString()),
+        el("div",{style:{fontSize:"10px",color:"#2A2A2A",marginTop:"4px"}},"if all weekends worked")
+      ),
+      el("div",{style:{textAlign:"right"}},
+        el("div",{style:{fontSize:"9px",color:"#222",letterSpacing:"1px",marginBottom:"4px"}},"REMAINING"),
+        el("div",{style:{fontSize:"20px",fontWeight:"300",color:"#3A3A3A"}},
+          "+€"+(pay.maxTotal - pay.earnedTotal).toLocaleString()
+        )
+      )
+    ));
+
+    // ── BREAKDOWN
+    if (pay.earnedDetails.length > 0 || pay.nightWeeksEarned > 0) {
+      var breakdown = el("div",{style:{background:"#0A0A0A",border:"1px solid #181818",borderRadius:"12px",padding:"16px",marginBottom:"14px"}},
+        el("div",{style:{fontSize:"9px",color:"#2A2A2A",letterSpacing:"2px",marginBottom:"12px"}},"BREAKDOWN")
+      );
+      function bRow(label,sub,val,color) {
+        breakdown.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid #111"}},
+          el("div",{},
+            el("div",{style:{fontSize:"12px",color:color||"#666"}},label),
+            el("div",{style:{fontSize:"10px",color:"#2A2A2A",marginTop:"2px"}},sub)
+          ),
+          el("div",{className:"mono",style:{fontSize:"13px",color:color||"#666"}},val)
+        ));
+      }
+      bRow("Base salary","Mon–Fri","€2,050","#555");
+      if(pay.earnedDetails.filter(function(d){return d.type==="saturday";}).length>0) {
+        var satE=pay.earnedDetails.filter(function(d){return d.type==="saturday";});
+        var satSum=satE.reduce(function(a,b){return a+b.extra;},0);
+        bRow("Saturday × "+satE.length,"worked","+ €"+satSum,"#E07A3A");
+      }
+      if(pay.earnedDetails.filter(function(d){return d.type==="sunday";}).length>0) {
+        var sunE=pay.earnedDetails.filter(function(d){return d.type==="sunday";});
+        bRow("Sunday × "+sunE.length,"€200 each","+ €"+(sunE.length*200),"#9B8EC4");
+      }
+      if(pay.earnedDetails.filter(function(d){return d.type==="holiday";}).length>0) {
+        var holE=pay.earnedDetails.filter(function(d){return d.type==="holiday";});
+        bRow("Holiday × "+holE.length,"€250 each","+ €"+(holE.length*250),"#D95F7A");
+      }
+      if(pay.nightWeeksEarned>0) bRow("Night shift × "+pay.nightWeeksEarned+" week","€150/week","+ €"+pay.nightEarned,"#7C9EBD");
+      breakdown.appendChild(el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:"10px"}},
+        el("div",{style:{fontSize:"13px",color:"#DCDCDC",fontWeight:"600"}},"Total earned"),
+        el("div",{className:"mono",style:{fontSize:"16px",color:"#4A9B6F",fontWeight:"600"}},"€"+pay.earnedTotal.toLocaleString())
+      ));
+      payDiv.appendChild(breakdown);
+    }
+
+    // ── EXTRA DAYS LIST
+    if (pay.earnedDetails.length > 0) {
+      var detDiv = el("div",{style:{marginBottom:"20px"}},
+        el("div",{style:{fontSize:"9px",color:"#2A2A2A",letterSpacing:"2px",marginBottom:"10px"}},"EXTRA DAYS WORKED")
+      );
+      pay.earnedDetails.forEach(function(d) {
+        detDiv.appendChild(el("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 0",borderBottom:"1px solid #0F0F0F"}},
+          el("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:tcPay[d.type],flexShrink:"0"}}),
+          el("div",{style:{flex:"1",fontSize:"12px",color:"#666"}},d.label),
+          el("div",{style:{fontSize:"10px",color:"#333"}},tlPay[d.type]),
+          el("div",{className:"mono",style:{fontSize:"13px",color:tcPay[d.type]}},"+€"+d.extra)
+        ));
+      });
+      payDiv.appendChild(detDiv);
+    }
+
+    payDiv.appendChild(el("div",{style:{fontSize:"9px",color:"#1A1A1A",textAlign:"center",padding:"8px 0 20px",letterSpacing:"1px"}},"* Based on Shift ends checkmarks"));
+    content = payDiv;
+  }
+
+  // ── MODALS
+  var shiftModal = null;
+  if (state.showShiftPicker) {
+    var shiftInner = el("div",{style:{background:"#141414",border:"1px solid #222",borderRadius:"16px 16px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:"480px"},onClick:function(e){e.stopPropagation();}},
+      el("div",{style:{fontSize:"10px",color:"#555",letterSpacing:"2px",marginBottom:"6px"}},"CHANGE SHIFT FOR"),
+      el("div",{style:{fontSize:"14px",color:"#DCDCDC",marginBottom:"20px"}},sel.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}))
+    );
+    var shiftIcons={Fruh:"☀️",Spat:"🌅",Nacht:"🌙",DayOff:"🌿"};
+    var shiftLabels={Fruh:"Morning Shift",Spat:"Afternoon Shift",Nacht:"Night Shift",DayOff:"Day Off"};
+    var shiftHours={Fruh:"06:00–14:00 · leave 05:15",Spat:"14:00–22:00 · leave 13:15",Nacht:"22:00–06:00 · leave 21:15",DayOff:"Free day — relaxed routine"};
+    ["Fruh","Spat","Nacht","DayOff"].forEach(function(sk) {
+      var sc=shiftConfig[sk], isActive=shiftKey===sk;
+      shiftInner.appendChild(el("div",{
+        style:{display:"flex",alignItems:"center",gap:"14px",padding:"14px",marginBottom:"8px",background:isActive?sc.accent+"15":"#1A1A1A",border:"1px solid "+(isActive?sc.accent:"#222"),borderRadius:"10px"},
+        onClick:(function(s){ return function(){
+          var no=Object.assign({},state.shiftOverrides);
+          if(shiftKey===s&&state.shiftOverrides[dk]) delete no[dk]; else no[dk]=s;
+          setState({shiftOverrides:no,showShiftPicker:false});
+        };})(sk)
+      },
+        el("span",{style:{fontSize:"18px",flexShrink:"0"}},shiftIcons[sk]),
+        el("div",{style:{flex:"1"}},
+          el("div",{style:{fontSize:"13px",color:isActive?sc.accent:"#CECECE",fontWeight:isActive?"600":"400"}},shiftLabels[sk]),
+          el("div",{className:"mono",style:{fontSize:"10px",color:"#333",marginTop:"2px"}},shiftHours[sk])
+        ),
+        isActive?el("span",{style:{fontSize:"14px",color:sc.accent}},"✓"):el("span",{})
+      ));
+    });
+    if(isOverridden) shiftInner.appendChild(el("button",{
+      style:{width:"100%",marginTop:"10px",padding:"10px",background:"transparent",border:"1px solid #2A2A2A",color:"#555",borderRadius:"8px",fontSize:"12px"},
+      onClick:function(){var no=Object.assign({},state.shiftOverrides);delete no[dk];setState({shiftOverrides:no,showShiftPicker:false});}
+    },"Reset to default schedule"));
+    shiftModal = el("div",{style:{position:"fixed",inset:"0",background:"#000000CC",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:"100"},onClick:function(){setState({showShiftPicker:false});}},shiftInner);
+  }
+
+  var hoursModal = null;
+  if (state.showHoursPicker) {
+    var hoursInner = el("div",{style:{background:"#141414",border:"1px solid #222",borderRadius:"16px 16px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:"480px"},onClick:function(e){e.stopPropagation();}},
+      el("div",{style:{fontSize:"10px",color:"#555",letterSpacing:"2px",marginBottom:"6px"}},"HOURS WORKED"),
+      el("div",{style:{fontSize:"14px",color:"#DCDCDC",marginBottom:"20px"}},sel.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}))
+    );
+    var hoursGrid=el("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px",marginBottom:"16px"}});
+    [3,4,5,6,7,8].forEach(function(h){
+      var isActive=customHoursToday===h;
+      hoursGrid.appendChild(el("button",{
+        style:{flex:"1 0 28%",padding:"14px 8px",background:isActive?accent+"20":"#1A1A1A",border:"1px solid "+(isActive?accent:"#252525"),color:isActive?accent:"#888",borderRadius:"8px",fontSize:"16px",fontWeight:isActive?"600":"400"},
+        onClick:(function(hh){ return function(){ var nh=Object.assign({},state.customHours); nh[dk]=hh; setState({customHours:nh,showHoursPicker:false}); };})(h)
+      },h+"h"));
+    });
+    hoursInner.appendChild(hoursGrid);
+    if(customHoursToday) hoursInner.appendChild(el("button",{
+      style:{width:"100%",padding:"10px",background:"transparent",border:"1px solid #222",color:"#444",borderRadius:"8px",fontSize:"12px"},
+      onClick:function(){var nh=Object.assign({},state.customHours);delete nh[dk];setState({customHours:nh,showHoursPicker:false});}
+    },"Clear — full shift (8h)"));
+    hoursModal = el("div",{style:{position:"fixed",inset:"0",background:"#000000CC",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:"100"},onClick:function(){setState({showHoursPicker:false});}},hoursInner);
+  }
+
+  var grocModal = null;
+  if (state.showGrocery) {
+    var gInner=el("div",{style:{background:"#141414",border:"1px solid #222",borderRadius:"16px 16px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:"480px"},onClick:function(e){e.stopPropagation();}},
+      el("div",{style:{fontSize:"10px",color:"#E8B84B",letterSpacing:"2px",marginBottom:"16px"}},"🛒 GROCERY CHECKLIST")
+    );
+    groceryList.forEach(function(item,i){
+      var k="grocery-"+i, done=!!state.checked[k];
+      gInner.appendChild(el("div",{
+        style:{display:"flex",alignItems:"center",gap:"12px",padding:"9px 0",borderBottom:"1px solid #1A1A1A",opacity:done?"0.3":"1"},
+        onClick:(function(kk){ return function(){ var nc=Object.assign({},state.checked); nc[kk]=!nc[kk]; setState({checked:nc}); }; })(k)
+      },
+        el("div",{style:{width:"16px",height:"16px",border:"1px solid "+(done?"#E8B84B":"#2A2A2A"),borderRadius:"3px",background:done?"#E8B84B":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}},
+          done?el("span",{style:{color:"#0F0F0F",fontSize:"9px",fontWeight:"800"}},"✓"):el("span",{})
+        ),
+        el("span",{style:{fontSize:"13px",color:done?"#333":"#C8C8C8",textDecoration:done?"line-through":"none"}},item)
+      ));
+    });
+    var nextDiv=el("div",{style:{marginTop:"18px"}},el("div",{style:{fontSize:"10px",color:"#333",marginBottom:"8px",letterSpacing:"1px"}},"SCHEDULE NEXT RUN"));
+    var btnRow=el("div",{style:{display:"flex",gap:"8px"}});
+    [4,5,6].forEach(function(d){
+      btnRow.appendChild(el("button",{style:{flex:"1",padding:"9px",background:"#1A1A1A",border:"1px solid #2A2A2A",color:"#888",borderRadius:"5px",fontSize:"11px"},onClick:function(){scheduleNextShopping(d);}}, "in "+d+" days"));
+    });
+    nextDiv.appendChild(btnRow);
+    gInner.appendChild(nextDiv);
+    grocModal=el("div",{style:{position:"fixed",inset:"0",background:"#000000CC",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:"100"},onClick:function(){setState({showGrocery:false});}},gInner);
+  }
+
+  var footer = el("div",{style:{padding:"32px 20px 48px",textAlign:"center"}},
+    el("div",{style:{fontSize:"9px",color:"#1A1A1A",letterSpacing:"2px"}},"DISCIPLINE · SIMPLICITY · PROGRESS")
+  );
+
+  app.appendChild(header);
+  app.appendChild(departure);
+  if(groceryBanner) app.appendChild(groceryBanner);
+  app.appendChild(viewToggle);
+  app.appendChild(legend);
+  app.appendChild(content);
+  app.appendChild(footer);
+  if(shiftModal) app.appendChild(shiftModal);
+  if(hoursModal) app.appendChild(hoursModal);
+  if(grocModal) app.appendChild(grocModal);
+}
+
+render();
+setInterval(render, 30000);
+</script>
+</body>
+</html>
