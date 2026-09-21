@@ -159,9 +159,18 @@ input{font-family:var(--font);}
 #sd.sy{background:var(--orange);}#sd.ok{background:var(--green);}#sd.er{background:var(--red);}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+
+/* AMIN HOME + WORLD */
+#homeGate{position:fixed;inset:0;z-index:1200;max-width:430px;margin:auto;background:#000;padding:calc(env(safe-area-inset-top,20px) + 34px) 18px 28px;overflow:auto;transition:opacity .38s,transform .55s cubic-bezier(.2,.85,.2,1)}
+#homeGate.away{opacity:0;transform:scale(.94) translateY(-10px);pointer-events:none}.home-eye{font-size:13px;color:var(--l2);font-weight:600}.home-title{font-size:38px;font-weight:750;letter-spacing:-1.4px;margin:5px 0 28px}.home-card{height:245px;width:100%;border-radius:28px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;border:1px solid var(--l4);text-align:left;transition:transform .18s}.home-card:active{transform:scale(.975)}.home-job{background:linear-gradient(145deg,#202024,#101012)}.home-world{background:radial-gradient(circle at 75% 25%,#20304d 0,#11182a 28%,#090b12 62%,#050506 100%)}.home-ic{font-size:42px}.home-card h2{font-size:29px;margin:14px 0 5px}.home-card p{color:var(--l2);font-size:14px}.home-arr{position:absolute;right:22px;bottom:20px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:24px}.mini-globe{position:absolute;width:180px;height:180px;border-radius:50%;right:-42px;top:-50px;background:radial-gradient(circle at 35% 30%,#f5c96c,#7b4b16 25%,#17264b 48%,#080a12 72%);opacity:.58;box-shadow:0 0 55px rgba(255,190,70,.18)}
+#jobBack{position:fixed;z-index:100;top:calc(env(safe-area-inset-top,12px) + 7px);left:max(12px,calc((100vw - 430px)/2 + 12px));width:34px;height:34px;border-radius:50%;background:rgba(44,44,46,.86);backdrop-filter:blur(15px);font-size:24px;color:var(--blue);display:none;align-items:center;justify-content:center}body.in-job #jobBack{display:flex}body.in-job .hdr{padding-top:64px}
+#worldView{position:fixed;inset:0;z-index:1100;max-width:430px;margin:auto;background:radial-gradient(circle at 50% 42%,#132039,#05070d 55%,#000 100%);overflow:hidden;transform:translateX(100%);transition:transform .55s cubic-bezier(.2,.85,.2,1)}#worldView.open{transform:none}.world-top{position:absolute;z-index:8;top:calc(env(safe-area-inset-top,12px) + 8px);left:16px;right:16px;display:flex;justify-content:space-between;align-items:center}.ios-back{width:38px;height:38px;border-radius:50%;background:rgba(28,28,30,.8);backdrop-filter:blur(16px);font-size:25px;color:var(--blue)}.day-pill{background:rgba(28,28,30,.78);backdrop-filter:blur(16px);padding:9px 13px;border-radius:18px;font-size:11px;color:#ddd}.world-space{position:absolute;inset:0;touch-action:pan-x}.stars{position:absolute;inset:-20%;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:43px 43px;opacity:.16}.world-globe{--rot:0deg;position:absolute;width:600px;height:600px;border-radius:50%;left:50%;top:46%;transform:translate(-50%,-50%) rotate(var(--rot));background:radial-gradient(circle at 35% 27%,rgba(255,255,255,.18),transparent 18%),radial-gradient(circle at 50% 48%,#294d58,#162c39 35%,#0a1725 65%,#02040a 78%);box-shadow:inset -55px -40px 90px #000,0 0 90px rgba(65,130,255,.16);transition:transform .65s cubic-bezier(.2,.85,.2,1)}.kingdom{position:absolute;width:150px;height:120px;border-radius:52% 48% 55% 45%;display:grid;place-items:center;text-align:center;padding:10px;filter:drop-shadow(0 8px 12px #0008);transition:transform .65s,filter .65s}.kingdom strong{font-size:16px}.kingdom span{font-size:11px;display:block;margin-top:4px}.k0{left:205px;top:55px;background:linear-gradient(145deg,#6b1518,#e13b32)}.k1{left:370px;top:205px;background:linear-gradient(145deg,#7d4310,#f5b83f)}.k2{left:210px;top:395px;background:linear-gradient(145deg,#34125c,#8d42d7)}.k3{left:45px;top:220px;background:linear-gradient(145deg,#123b6f,#3287dc)}.k4{left:78px;top:95px;width:92px;height:72px;background:linear-gradient(145deg,#386a32,#86b85e);opacity:.78}.kingdom.focus{transform:scale(1.23);filter:drop-shadow(0 0 24px rgba(255,255,255,.3));z-index:4}.bounty{position:absolute;z-index:5;top:100px;left:50%;transform:translateX(-50%);font-size:10px;color:#d8b46a;background:#17120bcc;border:1px solid #7c5b28;padding:7px 10px;border-radius:15px;white-space:nowrap}.world-panel{position:absolute;z-index:7;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,15px) + 18px);background:rgba(28,28,30,.8);backdrop-filter:blur(22px);border:1px solid var(--l4);border-radius:22px;padding:16px}.wp-top{display:flex;justify-content:space-between}.wp-name{font-size:21px;font-weight:750}.wp-progress{height:5px;background:#3a3a3c;border-radius:5px;margin:12px 0;overflow:hidden}.wp-fill{height:100%;background:#fff;border-radius:5px}.wp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.wp-stat{background:rgba(255,255,255,.06);padding:9px;border-radius:11px}.wp-stat small{display:block;color:#aaa;margin-top:3px}.wp-hint{text-align:center;font-size:11px;color:#999;margin-top:10px}
+.rate-list{padding:0 16px 12px}.rate-row{display:grid;grid-template-columns:1fr 1fr 86px;gap:7px;align-items:center;margin-bottom:7px}.rate-row select,.rate-row input{min-width:0;background:var(--bg3);border:0;color:#fff;border-radius:9px;padding:10px 8px;font-size:13px}.rate-save{width:100%;padding:11px;background:var(--blue);border-radius:10px;font-weight:600;margin-top:4px}
+
 </style>
 </head>
 <body>
+<div id="homeGate"><div class="home-eye">AMIN</div><div class="home-title">My Planner</div><button class="home-card home-job" onclick="openJob()"><div class="home-ic">💼</div><h2>Current Job</h2><p>Work · Shifts · Pay · Current income</p><div class="home-arr">›</div></button><button class="home-card home-world" onclick="openWorld()"><div class="mini-globe"></div><div class="home-ic">🌍</div><h2>AMIN WORLD</h2><p>Social Media · Voyage II · 56 Days</p><div class="home-arr">›</div></button></div><button id="jobBack" onclick="goHome()">‹</button>
 <div id="sd"></div>
 <div id="root">
 <div id="scroller"></div>
@@ -177,13 +186,14 @@ input{font-family:var(--font);}
 </button>
 </div>
 </div>
+<div id="worldView"><div class="world-top"><button class="ios-back" onclick="closeWorld()">‹</button><div class="day-pill" id="voyageDay">VOYAGE II · DAY 1 / 56</div></div><div class="world-space" id="worldSpace"><div class="stars"></div><div class="bounty">☠ FORBIDDEN SEA · 10M → 30M → 50M → 100M → 200M → 300M → 500M → 👑 990M</div><div class="world-globe" id="worldGlobe"><div class="kingdom k0" data-i="0"><div><strong>🔴 YouTube</strong><span>9.4K → 100K</span></div></div><div class="kingdom k1" data-i="1"><div><strong>🟠 Instagram</strong><span>19.8K → 100K</span></div></div><div class="kingdom k2" data-i="2"><div><strong>🟣 TikTok</strong><span>11.5K → 100K</span></div></div><div class="kingdom k3" data-i="3"><div><strong>🔵 Facebook</strong><span>45K → 100K</span></div></div><div class="kingdom k4" data-i="4"><div><strong>🍳 Cooking</strong><span>Side Journey</span></div></div></div></div><div class="world-panel"><div class="wp-top"><div><div class="card-label">Focused Kingdom</div><div class="wp-name" id="wpName">YouTube</div></div><div id="wpGoal">Goal 100K</div></div><div class="wp-progress"><div class="wp-fill" id="wpFill"></div></div><div class="wp-stats"><div class="wp-stat"><b id="wpStart">9.4K</b><small>Start</small></div><div class="wp-stat"><b id="wpNow">9.4K</b><small>Current</small></div><div class="wp-stat"><b id="wpGain">+0</b><small>Voyage gain</small></div></div><div class="wp-hint">Swipe left / right to travel between kingdoms</div></div></div>
 <script>
 var FB="https://amin-planer-default-rtdb.europe-west1.firebasedatabase.app";
 var stimer=null,sdot=null;
 function setSd(c){if(!sdot)sdot=document.getElementById("sd");sdot.className=c;}
 function fbGet(cb){var x=new XMLHttpRequest();x.open("GET",FB+"/aminPlanner.json",true);x.onload=function(){try{cb(JSON.parse(x.responseText));}catch(e){cb(null);}};x.onerror=function(){cb(null);};x.send();}
 function fbPut(d){setSd("sy");var x=new XMLHttpRequest();x.open("PUT",FB+"/aminPlanner.json",true);x.setRequestHeader("Content-Type","application/json");x.onload=function(){setSd(x.status===200?"ok":"er");setTimeout(function(){setSd("");},2000);};x.onerror=function(){setSd("er");};x.send(JSON.stringify(d));}
-function schedSync(){if(stimer)clearTimeout(stimer);stimer=setTimeout(function(){fbPut({checked:S.checked,customTasks:S.customTasks,lastShopping:S.lastShopping,shiftOverrides:S.shiftOverrides,customHours:S.customHours,closedDays:S.closedDays,extraShifts:S.extraShifts});},800);}
+function schedSync(){if(stimer)clearTimeout(stimer);stimer=setTimeout(function(){fbPut({checked:S.checked,customTasks:S.customTasks,lastShopping:S.lastShopping,shiftOverrides:S.shiftOverrides,customHours:S.customHours,closedDays:S.closedDays,extraShifts:S.extraShifts,customRates:S.customRates});},800);}
 var RATE=17.65;
 var aminShifts={27:"Spat",28:"Fruh",29:"Nacht",30:"Spat",31:"Fruh",32:"Spat",33:"Fruh",34:"Nacht",35:"Spat",36:"Fruh",37:"Spat",38:"Fruh",39:"Nacht",40:"Spat",41:"Fruh",42:"Spat",43:"Fruh",44:"Nacht",45:"Spat",46:"Fruh",47:"Spat",48:"Fruh",49:"Nacht",50:"Spat",51:"Fruh",52:"Spat",53:"Fruh"};
 var SC={
@@ -230,6 +240,7 @@ else if(zve<=277825){tax=0.42*zve-10602.13;}
 else{tax=0.45*zve-18936.88;}
 return Math.max(0,Math.round(tax/12));
 }
+function getRate(date,sk){var v=S.customRates&&S.customRates[sk+"_"+date.getDay()];return v?parseFloat(v):RATE;}
 function calcPay(yr,mo){
 var dim=new Date(yr,mo+1,0).getDate();
 var wdSVB=0,wdSt=0,weSVB=0,weSt=0,dets=[],wkByDay={},wkOrder=[];
@@ -243,24 +254,24 @@ var isNachtSun=(date.getDay()===0 && sk==="Nacht");
 var isNachtFriOT=(date.getDay()===5 && sk==="Nacht"); // Friday night of a Nacht week = Uberstunden, not auto-paid
 if((dt2==="weekday" && !isNachtFriOT) || isNachtSun){
 if(sk==="DayOff") continue;
-var h=S.customHours[dkey]||8;
-wdSVB+=h*RATE;
-if(sk==="Spat") wdSVB+=h*RATE*0.06;
-else if(sk==="Nacht"){wdSVB+=h*RATE*0.02;wdSt+=h*RATE*0.52;}
-if(isNachtSun) wdSt+=h*RATE; // Sonntag stfrei bonus
+var h=S.customHours[dkey]||8,rate=getRate(date,sk);
+wdSVB+=h*rate;
+if(sk==="Spat") wdSVB+=h*rate*0.06;
+else if(sk==="Nacht"){wdSVB+=h*rate*0.02;wdSt+=h*rate*0.52;}
+if(isNachtSun) wdSt+=h*rate; // Sonntag stfrei bonus
 } else {
 if(S.closedDays[dkey]) continue;
 var ess=(S.extraShifts||{})[dkey]||[];
 for(var si=0;si<ess.length;si++){
 var es=ess[si],h2=es.hours||0;
 if(!h2) continue;
-var base=h2*RATE,dz=0,dzSt=0,sz=0,szSt=0;
+var erate=getRate(date,es.type),base=h2*erate,dz=0,dzSt=0,sz=0,szSt=0;
 weSVB+=base;
-if(dt2==="saturday"){dz=h2*RATE*1.5;weSVB+=dz;}
-else if(dt2==="sunday"||dt2==="holiday"){dzSt=h2*RATE;weSt+=dzSt;}
+if(dt2==="saturday"){dz=h2*erate*1.5;weSVB+=dz;}
+else if(dt2==="sunday"||dt2==="holiday"){dzSt=h2*erate;weSt+=dzSt;}
 // dt2==="weekday" here means Friday-night overtime: no extra day-bonus, just base + shift Zuschlag below
-if(es.type==="Spat"){sz=h2*RATE*0.06;weSVB+=sz;}
-else if(es.type==="Nacht"){sz=h2*RATE*0.02;weSVB+=sz;szSt=h2*RATE*0.52;weSt+=szSt;}
+if(es.type==="Spat"){sz=h2*erate*0.06;weSVB+=sz;}
+else if(es.type==="Nacht"){sz=h2*erate*0.02;weSVB+=sz;szSt=h2*erate*0.52;weSt+=szSt;}
 var tot=base+dz+dzSt+sz+szSt;
 if(!wkByDay[dkey]){wkByDay[dkey]={label:date.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}),type:dt2,color:dtC[dt2]||"#888",typeLabel:dtL[dt2]||dt2,count:0,hours:0,total:0,shiftNames:[]};wkOrder.push(dkey);}
 wkByDay[dkey].count+=1;
@@ -286,21 +297,21 @@ var isNachtSun2=(date2.getDay()===0 && sk2==="Nacht");
 var isNachtFriOT2=(date2.getDay()===5 && sk2==="Nacht");
 if((dt3==="weekday" && !isNachtFriOT2) || isNachtSun2) continue;
 if(S.closedDays[dkey2]) continue;
-mxSVB+=8*RATE;
-if(dt3==="saturday") mxSVB+=8*RATE*1.5;
-else if(dt3==="sunday"||dt3==="holiday") mxSt+=8*RATE;
-if(isNachtFriOT2){mxSVB+=8*RATE*0.02;mxSt+=8*RATE*0.52;}
+var mrate=getRate(date2,sk2);mxSVB+=8*mrate;
+if(dt3==="saturday") mxSVB+=8*mrate*1.5;
+else if(dt3==="sunday"||dt3==="holiday") mxSt+=8*mrate;
+if(isNachtFriOT2){mxSVB+=8*mrate*0.02;mxSt+=8*mrate*0.52;}
 }
 var mxGb=mxSVB+mxSt,mxSV=mxSVB*0.212,mxLst=calcLSt(mxSVB),mxKst=Math.round(mxLst*0.09);
 var maxNetto=mxGb-mxSV-mxLst-mxKst;
 return{gBrutto:gBrutto,tSVB:tSVB,tSt:tSt,kv:kv,rv:rv,av:av,pv:pv,tSV:tSV,lst:lst,kst:kst,tSteuer:tSteuer,netto:netto,maxNetto:maxNetto,dets:dets,extraTotal:extraTotal,wdBase:wdSVB+wdSt};
 }
 // STATE
-var S={sel:new Date(),view:"day",checked:{},customTasks:[],showAdd:false,showShift:false,showHours:false,showGrocery:false,showExShift:false,exShiftDate:null,exType:"Spat",exHours:8,newTitle:"",newTime:"",lastShopping:null,shiftOverrides:{},customHours:{},closedDays:{},extraShifts:{},showWkDetail:false};
-function applyData(d){if(!d)return;if(d.checked)S.checked=d.checked;if(d.customTasks)S.customTasks=d.customTasks;if(d.lastShopping)S.lastShopping=d.lastShopping;if(d.shiftOverrides)S.shiftOverrides=d.shiftOverrides;if(d.customHours)S.customHours=d.customHours;if(d.closedDays)S.closedDays=d.closedDays;if(d.extraShifts)S.extraShifts=d.extraShifts;}
+var S={sel:new Date(),view:"day",checked:{},customTasks:[],showAdd:false,showShift:false,showHours:false,showGrocery:false,showExShift:false,exShiftDate:null,exType:"Spat",exHours:8,newTitle:"",newTime:"",lastShopping:null,shiftOverrides:{},customHours:{},closedDays:{},extraShifts:{},customRates:{},showWkDetail:false};
+function applyData(d){if(!d)return;if(d.checked)S.checked=d.checked;if(d.customTasks)S.customTasks=d.customTasks;if(d.lastShopping)S.lastShopping=d.lastShopping;if(d.shiftOverrides)S.shiftOverrides=d.shiftOverrides;if(d.customHours)S.customHours=d.customHours;if(d.closedDays)S.closedDays=d.closedDays;if(d.extraShifts)S.extraShifts=d.extraShifts;if(d.customRates)S.customRates=d.customRates;}
 try{var ls=localStorage.getItem("aminPlanner");if(ls)applyData(JSON.parse(ls));}catch(e){}
 (function(){var tm=new Date();tm.setDate(tm.getDate()+1);var tk=dk(tm);if(!S.customTasks.some(function(t){return t.isGrocery&&t.dateKey===tk;})&&!S.lastShopping){S.customTasks.push({id:9000001,title:"Grocery shopping",time:"09:00",dateKey:tk,isGrocery:true});S.lastShopping=tk;}})();
-function save(){var d={checked:S.checked,customTasks:S.customTasks,lastShopping:S.lastShopping,shiftOverrides:S.shiftOverrides,customHours:S.customHours,closedDays:S.closedDays,extraShifts:S.extraShifts};try{localStorage.setItem("aminPlanner",JSON.stringify(d));}catch(e){}schedSync();}
+function save(){var d={checked:S.checked,customTasks:S.customTasks,lastShopping:S.lastShopping,shiftOverrides:S.shiftOverrides,customHours:S.customHours,closedDays:S.closedDays,extraShifts:S.extraShifts,customRates:S.customRates};try{localStorage.setItem("aminPlanner",JSON.stringify(d));}catch(e){}schedSync();}
 function setState(u){Object.assign(S,u);save();render();}
 setSd("sy");fbGet(function(d){applyData(d);save();setSd("ok");setTimeout(function(){setSd("");},2000);render();});
 function toggle(key,isGroc,gdk){
@@ -600,6 +611,10 @@ var uVal=el("div",{style:{fontSize:"15px",fontWeight:"600",color:exDayCount>0?"v
 var uArrow=el("div",{style:{fontSize:"18px",color:"var(--l3)"}});uArrow.textContent="\u203a";
 uRow.appendChild(uLabel);uRow.appendChild(uVal);uRow.appendChild(uArrow);uCard.appendChild(uRow);
 sc.appendChild(uCard);
+// Custom hourly rates
+var rc=div("card");var rh=div("card-hdr");var rl=el("div",{className:"card-label"});rl.textContent="Custom Pay Rates";rh.appendChild(rl);rc.appendChild(rh);
+var rsub=el("div",{style:{fontSize:"12px",color:"var(--l3)",padding:"0 16px 10px"}});rsub.textContent="Override €17.65/h for a specific shift × weekday. It recalculates past matching days too.";rc.appendChild(rsub);
+var rf=div("rate-list");var rr=div("rate-row");var rsel=document.createElement("select");[["Fruh","Morning"],["Spat","Afternoon"],["Nacht","Night"]].forEach(function(x){var o=document.createElement("option");o.value=x[0];o.textContent=x[1];rsel.appendChild(o);});var dsel=document.createElement("select");[[1,"Mon"],[2,"Tue"],[3,"Wed"],[4,"Thu"],[5,"Fri"],[6,"Sat"],[0,"Sun"]].forEach(function(x){var o=document.createElement("option");o.value=x[0];o.textContent=x[1];dsel.appendChild(o);});var rin=document.createElement("input");rin.type="number";rin.step="0.01";rin.placeholder="€/h";rr.appendChild(rsel);rr.appendChild(dsel);rr.appendChild(rin);rf.appendChild(rr);var rbtn=el("button",{className:"rate-save"});rbtn.textContent="Save Rate";rbtn.onclick=function(){var v=parseFloat(rin.value);if(!v||v<1)return;var nr=Object.assign({},S.customRates);nr[rsel.value+"_"+dsel.value]=v;setState({customRates:nr});};rf.appendChild(rbtn);Object.keys(S.customRates||{}).forEach(function(k){var parts=k.split("_"),days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var x=div("brow");var l=el("div",{className:"brow-t"});l.textContent=(SNAMES[parts[0]]||parts[0])+" · "+days[+parts[1]];var v=el("div",{className:"brow-v",style:{color:"var(--blue)"}});v.textContent="€"+Number(S.customRates[k]).toFixed(2)+"/h";x.appendChild(l);x.appendChild(v);rf.appendChild(x);});rc.appendChild(rf);sc.appendChild(rc);
 var note=el("div",{style:{textAlign:"center",padding:"14px 20px 8px",fontSize:"12px",color:"var(--l3)"}});note.textContent="Verified against Abrechnung \u00b7 StKl. 1 \u00b7 KiSt 9%";sc.appendChild(note);
 }
 sc.appendChild(el("div",{style:{height:"16px"}}));
@@ -724,6 +739,18 @@ var ca5=el("div",{className:"sh-cancel",onclick:function(){setState({showWkDetai
 document.body.appendChild(m5.ov);
 }
 }
+
+// Home / AMIN World navigation
+function openJob(){document.getElementById("homeGate").classList.add("away");document.body.classList.add("in-job");}
+function goHome(){document.body.classList.remove("in-job");document.getElementById("homeGate").classList.remove("away");}
+function openWorld(){document.getElementById("homeGate").classList.add("away");document.getElementById("worldView").classList.add("open");initVoyage();focusWorld(0);}
+function closeWorld(){document.getElementById("worldView").classList.remove("open");setTimeout(function(){document.getElementById("homeGate").classList.remove("away");},250);}
+var worldPlatforms=[{name:"YouTube",start:9400,now:9400,goal:100000},{name:"Instagram",start:19800,now:19800,goal:100000},{name:"TikTok",start:11500,now:11500,goal:100000},{name:"Facebook",start:45000,now:45000,goal:100000},{name:"Cooking",start:0,now:0,goal:10000}],worldIndex=0,worldStartX=0;
+function initVoyage(){var el=document.getElementById("voyageDay");if(el)el.textContent="VOYAGE II · 56 DAYS";}
+function wshort(n){if(n>=1000000)return (n/1000000).toFixed(1).replace(".0","")+"M";if(n>=1000)return (n/1000).toFixed(1).replace(".0","")+"K";return String(n);}
+function focusWorld(i){worldIndex=(i+worldPlatforms.length)%worldPlatforms.length;var g=document.getElementById("worldGlobe");if(!g)return;g.style.setProperty("--rot",(-worldIndex*72)+"deg");document.querySelectorAll(".kingdom").forEach(function(x,j){x.classList.toggle("focus",j===worldIndex);});var p=worldPlatforms[worldIndex];document.getElementById("wpName").textContent=p.name;document.getElementById("wpGoal").textContent="Goal "+wshort(p.goal);document.getElementById("wpStart").textContent=wshort(p.start);document.getElementById("wpNow").textContent=wshort(p.now);document.getElementById("wpGain").textContent="+"+wshort(Math.max(0,p.now-p.start));document.getElementById("wpFill").style.width=Math.min(100,p.now/p.goal*100)+"%";}
+(function(){var ws=document.getElementById("worldSpace");if(ws){ws.addEventListener("touchstart",function(e){worldStartX=e.touches[0].clientX;},{passive:true});ws.addEventListener("touchend",function(e){var dx=e.changedTouches[0].clientX-worldStartX;if(Math.abs(dx)>35)focusWorld(worldIndex+(dx<0?1:-1));},{passive:true});}document.querySelectorAll(".kingdom").forEach(function(x){x.onclick=function(){focusWorld(+x.getAttribute("data-i"));};});})();
+
 render();
 setInterval(render,30000);
 </script>
